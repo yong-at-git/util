@@ -22,15 +22,22 @@ for repo_meta in all_repos_metadata:
     repo_url = repo_meta['url']
     repo_stats_url = repo_url + '/stats/contributors'
 
-    repo_stats = requests.get(repo_stats_url, headers=auth_header).json()
-    contribution_by_target_user = list(
-        filter(lambda contribution: github_username == contribution['author']['login'], repo_stats))
+    try:
+        repo_stats = requests.get(repo_stats_url, headers=auth_header).json()
+        contribution_by_target_user = list(
+            filter(lambda contribution: github_username == contribution['author']['login'], repo_stats))
 
-    # now we only have single json representing target user's contribution in the list
-    total_commits_on_repo = contribution_by_target_user[0]['total']
+        # now we only have single json representing target user's contribution in the list
+        try:
+            total_commits_on_repo = contribution_by_target_user[0]['total']
 
-    print('Commits:', total_commits_on_repo, ', on repo: ', repo_stats_url)
+            print('Commits:', total_commits_on_repo, ', on repo: ', repo_url)
 
-    commits.append(total_commits_on_repo)
+            commits.append(total_commits_on_repo)
+        except Exception as e:
+            raise Exception('Failed to retrieve meta data from: ' + repo_stats_url, ', got resp: ',
+                            contribution_by_target_user, e)
+    except Exception as e:
+        print(e)
 
 print('Total commits: ', sum(commits))

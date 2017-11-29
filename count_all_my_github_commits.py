@@ -14,7 +14,11 @@ github_username = ''
 
 auth_header = {'Authorization': 'token ' + token}
 repos_url = 'https://api.github.com/users/' + github_username + '/repos'
-all_repos_metadata = requests.get(repos_url, headers=auth_header).json()
+
+session = requests.session()
+session.headers.update(auth_header)
+
+all_repos_metadata = session.get(repos_url).json()
 
 commits = []
 
@@ -23,7 +27,7 @@ for repo_meta in all_repos_metadata:
     repo_stats_url = repo_url + '/stats/contributors'
 
     try:
-        repo_stats = requests.get(repo_stats_url, headers=auth_header).json()
+        repo_stats = session.get(repo_stats_url).json()
         contribution_by_target_user = list(
             filter(lambda contribution: github_username == contribution['author']['login'], repo_stats))
 
